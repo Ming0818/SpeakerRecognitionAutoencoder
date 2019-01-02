@@ -2,14 +2,47 @@ import pathlib, os
 
 abs_dir = '/'.join(os.path.abspath(__file__).split('/')[:-1])
 
-data_folder = os.path.join(abs_dir, 'data', 'data_set_name')
+data_folder = os.path.join(abs_dir, 'data', '{data_set_folder}')
 """
                     possible_ dataset_names:
-                        Speaker_in_the_wild_3_Seconds,
-                        Speaker_in_the_wild_25_Milli,
+                        Speaker_in_the_wild,
+                        VoxCeleb1, 
+                        VoxCeleb2,
+                        VoxCeleb1_Test_Set,
+                    datasets and configuration saved in the datasdets dict
 """
 
 model_save_format = os.path.join(abs_dir, 'models', 'CheckPoints', '{}')
+
+
+datasets = {
+    'Speaker_in_the_wild': {
+        "name": "Speaker_in_the_wild",
+        "listing_method": "",
+        "types": ["dev", "eval"],
+        "components": ['audio', 'keys', 'lists'],
+        "data_set_folder": "SITW"
+    },
+    'VoxCeleb1': {
+        "name": "VoxCeleb1",
+        # "listing_method": "user_session_record",   # fresh download
+        "listing_method": "user_record",   # modified for kaldi
+        "user_count": 1251,
+        "data_set_folder": os.path.join("VoxCeleb1", "voxceleb1_wav")
+    },
+    'VoxCeleb2': {
+        "name": "VoxCeleb2",
+        "listing_method": "user_session_record",   # modified for kaldi
+        "types": ["dev"],
+        "aac": ["aac"],
+        "user_count": 5994,
+        "data_set_folder": "VoxCeleb2/dev/aac"
+
+    },
+    'VoxCeleb1_Test_Set': {
+        "name": "VoxCeleb1_Test_Set"
+    },
+}
 
 
 def make_folders():
@@ -21,3 +54,4 @@ def make_folders():
 
 if __name__ == '__main__':
     make_folders()
+    print(data_folder)

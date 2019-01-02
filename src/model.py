@@ -15,7 +15,7 @@ class Autoencoder:
     model = km.Sequential()
 
     def __init__(self,
-                 layer_count=10,
+                 layer_count=20,
                  layer_type='Covolution1D',
                  filter_size=2,
                  kernel_size=10,
@@ -32,7 +32,7 @@ class Autoencoder:
                     kl.MaxPool1D(pool_size=2)
                 )
 
-            for _ in range(layer_count):
+            for _ in range(layer_count)[::-1]:
                 self.model.add(
                     kl.Conv1D(filters=max(filter_size*_, 1), kernel_size=kernel_size, strides=1, activation='relu')
                 )
@@ -40,11 +40,7 @@ class Autoencoder:
                     kl.UpSampling1D(size=2)
                 )
 
-        self.model.optimizer = optmz.SGD()
-        self.model.loss = 'mean_squared_error'
-        self.model.metrics = 'accuracy'
-        self.model.sample_weight_mode = None
-        self.model.loss_weights = None
+        self.model.compile(optimizer='SGD', loss='mse', metrics=['accuracy'])
 
         # Naming the Autoencoder to save and read later
         self.model_name = self.model_name.format('#{}_Layers_{}'.format(layer_count, str(datetime.datetime.now())))
@@ -52,10 +48,11 @@ class Autoencoder:
     def train_to_epoch(self, input_data, output_data, epochs=100, batch_size=64):
         self.model.fit(input_data, output_data, epochs=epochs, batch_size=batch_size)
 
-    def train_to_loss(self, input_data, output_data, loss_limit=0.1, batch_size=64):
+    def train_to_loss(self, input_data, output_data, loss_limit=0.1, batch_size=1):
         t_h = numpy.Inf
+
         while t_h > loss_limit:
-            t_h = self.model.fit(input_data, output_data, epochs=10, batch_size=batch_size).history['loss'][-1]
+            t_h = self.model.fit([input_data], [output_data], epochs=10, batch_size=batch_size).history['loss'][-1]
 
     def encode_input(self, input_data):
         layer_count = len(self.model.layers)
