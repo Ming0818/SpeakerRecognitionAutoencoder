@@ -15,42 +15,42 @@ class Autoencoder:
     model = km.Sequential()
 
     def __init__(self,
-                 layer_count=20,
-                 layer_type='Covolution1D',
-                 filter_size=2,
-                 kernel_size=10,
-                 input_shape=(48000, 1)
+                 layer_count=10
                  ):
+        self.layer_count = layer_count
+        self.input_seq = kl.Input(shape=(48000, 1))
 
-        self.model.add(kl.InputLayer(input_shape=input_shape))
-        if layer_type == 'Convolution1D':
-            for _ in range(layer_count):
-                self.model.add(
-                    kl.Conv1D(filters=max(filter_size*_, 1), kernel_size=kernel_size, strides=1, activation='relu')
-                )
-                self.model.add(
-                    kl.MaxPool1D(pool_size=2)
-                )
+        encoder = kl.Conv1D(filters=1, kernel_size=3, padding='same', data_format='channels_last', dilation_rate=1,
+                            # encoder is developed here
+                            activation='relu', use_bias=False)(self.input_seq)
+        encoder = kl.MaxPooling1D(pool_size=(2,))(encoder)
+        for _ in range(self.layer_count // 2)[1:]:
+            encoder = kl.Conv1D(filters=2 ** _, kernel_size=3, padding='same', data_format='channels_last',
+                                dilation_rate=1,
+                                activation='relu', use_bias=False)(encoder)
+            encoder = kl.MaxPooling1D(pool_size=(2,))(encoder)
 
-            for _ in range(layer_count)[::-1]:
-                self.model.add(
-                    kl.Conv1D(filters=max(filter_size*_, 1), kernel_size=kernel_size, strides=1, activation='relu')
-                )
-                self.model.add(
-                    kl.UpSampling1D(size=2)
-                )
+        decoder = encoder
+        for _ in range(self.layer_count // 2)[::-1]:
+            decoder = kl.Conv1D(filters=2 ** _, kernel_size=3, padding='same', data_format='channels_last',
+                                dilation_rate=1,
+                                activation='relu', use_bias=False)(decoder)
+            decoder = kl.UpSampling1D(2)(decoder)
 
-        self.model.compile(optimizer='SGD', loss='mse', metrics=['accuracy'])
+        self.model = ke.Model(self.input_seq, decoder)
+
+        sgd = ke.optimizers.SGD(decay=1e-5, momentum=0.9, nesterov=True)
+
+        self.model.compile(optimizer=sgd, loss='mean_squared_error')
 
         # Naming the Autoencoder to save and read later
         self.model_name = self.model_name.format('#{}_Layers_{}'.format(layer_count, str(datetime.datetime.now())))
 
-    def train_to_epoch(self, input_data, output_data, epochs=100, batch_size=64):
-        self.model.fit(input_data, output_data, epochs=epochs, batch_size=batch_size)
+    def train_to_epoch(self, input_data, output_data, epochs=100, batch_size=100):
+        return self.model.fit([input_data], [output_data], epochs=epochs, batch_size=batch_size).history['loss'][-1]
 
     def train_to_loss(self, input_data, output_data, loss_limit=0.1, batch_size=1):
         t_h = numpy.Inf
-
         while t_h > loss_limit:
             t_h = self.model.fit([input_data], [output_data], epochs=10, batch_size=batch_size).history['loss'][-1]
 
@@ -61,5 +61,8 @@ class Autoencoder:
         layer_out = functor([input_data, 1.])
         return layer_out
 
+    def load(self, filename):
+        self.model.load_weights(filename)
+
     def save(self):
-        self.model.save(model_save_format.format(self.model_name))
+        self.model.save_weights(model_save_format.format(self.model_name))

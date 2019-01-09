@@ -75,14 +75,14 @@ class Dataset:
         output_file = np.random.choice(user_files)
         y = librosa.load(input_file , sr=16000, dtype=np.float64)[0]
         random_point = np.random.randint(0, len(y) - 48000)
-        input = np.array([[x*1000] for x in y[random_point:random_point + 48000]])
+        input = np.array([[x*10] for x in y[random_point:random_point + 48000]])
 
         y = librosa.load(output_file, sr=16000, dtype=np.float64)[0]
         random_point = np.random.randint(0, len(y) - 48000)
-        output= np.array([[x*1000] for x in y[random_point:random_point + 48000]])
+        output= np.array([[x*10] for x in y[random_point:random_point + 48000]])
         """ y, s=  librosa.load(file, sr=16000, duration=3.0, dtype=np.float64) is the common use of this function 
         but since the sample rate is fixed and also we don't need it we only get the first token also since we have 
-        extremely low values of sound sample which is hard to work with I have multiplied it by 1000 to make it work
+        extremely low values of sound sample which is hard to work with I have multiplied it by 10 to make it work
         better"""
         return input, output
 
@@ -94,6 +94,16 @@ class Dataset:
             train_input.append(np.array(input))
             train_output.append(np.array(output))
         return train_input, train_output
+
+    def read_whole_data_set_for_user(self, user_id):
+        user_files = self.users_dict.get(user_id, [])
+        read_files = []
+        for input_file in user_files:
+            y = librosa.load(input_file, sr=16000, dtype=np.float64)[0]
+            random_point = np.random.randint(0, len(y) - 48000)
+            input = np.array([[x * 10] for x in y[random_point:random_point + 48000]])
+            read_files.append(input)
+        return read_files
 
 
 if __name__ == '__main__':

@@ -1,8 +1,10 @@
-import pathlib, os
+import pathlib
+import os
 
 abs_dir = '/'.join(os.path.abspath(__file__).split('/')[:-1])
 
 data_folder = os.path.join(abs_dir, 'data', '{data_set_folder}')
+SVM_save_folder = os.path.join(abs_dir, 'data', '{data_set_folder}','{user}')
 """
                     possible_ dataset_names:
                         Speaker_in_the_wild,
@@ -13,6 +15,8 @@ data_folder = os.path.join(abs_dir, 'data', '{data_set_folder}')
 """
 
 model_save_format = os.path.join(abs_dir, 'models', 'CheckPoints', '{}')
+
+train_set_encoded_save_folder = os.path.join(abs_dir, 'encodes2', '{}')
 
 
 datasets = {
@@ -40,7 +44,11 @@ datasets = {
 
     },
     'VoxCeleb1_Test_Set': {
-        "name": "VoxCeleb1_Test_Set"
+        "name": "VoxCeleb1_Test_Set",
+        # "listing_method": "user_session_record",   # fresh download
+        "listing_method": "user_record",   # modified for kaldi
+        "user_count": 40,
+        "data_set_folder": os.path.join("VoxCeleb1", "voxceleb1_wav_test")
     },
 }
 
