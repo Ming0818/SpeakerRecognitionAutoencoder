@@ -55,28 +55,28 @@ test_ds = Dataset(data_set_name="VoxCeleb1_Test_Set")
 # Extract Train Data Points and Train SVM
 #
 #
-# for user in progressbar.progressbar(test_ds.users_list):
-#     raw_data = test_ds.read_whole_data_set_for_user(user)
-#     encoded_records = ae.encode_input(input_data=raw_data)
-#     reference_records = encoded_records[0][:5]
-#     SVM_train_user_set = np.random.choice(train_ds.users_list, 50)
-#
-#     train_data, train_label = [], []
-#     for Non_User in SVM_train_user_set:
-#         reference_points = np.reshape(reference_records, (len(reference_records), -1))
-#         train_data.extend(reference_points)
-#         train_label.extend([1]*len(reference_records))
-#
-#
-#         other_records = list(map(float, read_random_line(train_set_encoded_save_folder.format(Non_User)).split()))
-#
-#         negative_records = [other_records]
-#
-#         train_data.extend(negative_records)
-#         train_label.extend([0]*len(negative_records))
-#     clf = svm.SVC(gamma='scale', probability=True)
-#     clf.fit(train_data, train_label)
-#     pickle.dump(clf, open(SVM_save_folder.format(data_set_folder='VOXCELEB1_test_SVMs', user=user), 'wb'))
+for user in progressbar.progressbar(test_ds.users_list):
+    raw_data = test_ds.read_whole_data_set_for_user(user)
+    encoded_records = ae.encode_input(input_data=raw_data)
+    reference_records = encoded_records[0][:5]
+    SVM_train_user_set = np.random.choice(train_ds.users_list, 30)
+
+    train_data, train_label = [], []
+    for Non_User in SVM_train_user_set:
+        reference_points = np.reshape(reference_records, (len(reference_records), -1))
+        train_data.extend(reference_points)
+        train_label.extend([1]*len(reference_records))
+
+
+        other_records = list(map(float, read_random_line(train_set_encoded_save_folder.format(Non_User)).split()))
+
+        negative_records = [other_records]
+
+        train_data.extend(negative_records)
+        train_label.extend([0]*len(negative_records))
+    clf = svm.SVC(gamma='scale', probability=True)
+    clf.fit(train_data, train_label)
+    pickle.dump(clf, open(SVM_save_folder.format(data_set_folder='VOXCELEB1_test_SVMs', user=user), 'wb'))
 ###############################################
 
 
