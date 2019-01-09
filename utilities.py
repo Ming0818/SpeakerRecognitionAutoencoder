@@ -14,5 +14,5 @@ def read_random_line(filename):
         if line != '':
             fd.close()
             break
-    if line != '' :
+    if line != '':
         return line

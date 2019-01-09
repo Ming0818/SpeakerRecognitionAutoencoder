@@ -6,9 +6,9 @@ import os
 import json
 import librosa
 
+
 # listing functions
 def user_record(data_set):
-    print('Listing for Dataset {}'.format(data_set['name']))
     dataset_path = data_folder.format(data_set_folder=data_set['data_set_folder'])
     user_files = dict()
     try:
@@ -31,7 +31,6 @@ def user_record(data_set):
 
 
 def u_s_r(data_set):
-    print('Listing for Dataset {}'.format(data_set['name']))
     dataset_path = data_folder.format(data_set_folder=data_set['data_set_folder'])
     user_files = dict()
     try:
